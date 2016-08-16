@@ -49,12 +49,19 @@ docker_installation_package 'default' do
 end
 
 # create the docker service
+
 docker_service 'default' do
   storage_driver node['amazon-ecs-agent']['storage_driver']
+
+  if node['amazon-ecs-agent']['storage_driver_opts']
+    storage_opts node['amazon-ecs-agent']['storage_driver_opts']
+  end
+
   action [:create, :start]
   log_driver 'gelf'
   log_opts ['gelf-address=udp://localhost:9998']
 end
+
 
 # pull down the latest image
 docker_image 'amazon/amazon-ecs-agent'
