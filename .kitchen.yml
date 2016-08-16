@@ -1,28 +1,63 @@
 ---
 driver:
   name: vagrant
-
+  customize:
+    memory: 2048
+  network:
+   - [ "forwarded_port", { guest: 8080, host: 8080} ]
 
 provisioner:
   name: chef_zero
+  chef_omnibus_install_options: -d /tmp/vagrant-cache/vagrant-omnibus
+  data_bags_path: "../../data_bags"
+  encrypted_data_bag_secret_key_path: "<%= ENV['HOME'] %>/.chef/encrypted_data_bag_secret"
+  environments_path: "../../environments"
+  client_rb:
+    environment: development
+
+verifier:
+  name: inspec
 
 platforms:
   - name: ubuntu-14.04
+    driver:
+      name: ec2
+      aws_ssh_key_id: kitchen_testing
+      security_group_ids: ["sg-f4702a93"]
+      region: eu-west-1
+      require_chef_omnibus: true
+      subnet_id: subnet-7e706a27
+      instance_type: t2.medium
+      associate_public_ip: true
+      iam_profile_name: kitchen_testing_role
+      image_id: ami-8328bbf0
+      block_device_mappings:
+        - device_name: /dev/xvda
+          ebs:
+            volume_type: standard
+            volume_size: 30
+            delete_on_termination: true
+
+    transport:
+      ssh_key: ~/.ssh/kitchen_testing.pem
+
+    provisioner:
+      name: chef_solo
+      chef_omnibus_install_options: -d /tmp/vagrant-cache/vagrant-omnibus
+      data_bags_path: "../../data_bags"
+      encrypted_data_bag_secret_key_path: "<%= ENV['HOME'] %>/.chef/encrypted_data_bag_secret"
+      environments_path: "../../environments"
+      client_rb:
+        environment: development
 
 suites:
   - name: default
-    run_list:
-      - recipe[amazon-ecs-agent]
-    attributes:
-
-  - name: default-ec2
-    driver_plugin: ec2
     driver:
-      username: ubuntu
-      image_id: ami-74e27e1c
+      name: vagrant
+      customize:
+        memory: 2048
     run_list:
       - recipe[amazon-ecs-agent]
-    attributes:
-      amazon-ecs-agent:
-        aws_access_key_id: <%= ENV['AWS_ACCESS_KEY_ID'] %>
-        aws_secret_access_key: <%= ENV['AWS_SECRET_ACCESS_KEY'] %>
+  - name: ec2
+    run_list:
+      - recipe[amazon-ecs-agent]
