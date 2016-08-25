@@ -46,6 +46,10 @@ end
 docker_installation_package 'default' do
   version node['amazon-ecs-agent']['docker']['version']
   action :create
+  case node[:platform]
+  when 'ubuntu','debian'
+    package_options '-o Dpkg::Options::="--force-confdef"'
+  end
 end
 
 # create the docker service
