@@ -85,4 +85,5 @@ docker_container 'amazon-ecs-agent' do
     '/var/run/docker.sock:/var/run/docker.sock',
     "#{node['amazon-ecs-agent']['data_folder']}:/data"
   ] + node['amazon-ecs-agent']['docker_additional_binds']
+  action :run
 end
