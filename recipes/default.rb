@@ -90,4 +90,13 @@ docker_container 'amazon-ecs-agent' do
     "#{node['amazon-ecs-agent']['data_folder']}:/data"
   ] + node['amazon-ecs-agent']['docker_additional_binds']
   action :run
+  restart_policy 'always'
+end
+
+# ECS doesn't clean old images
+# https://aws.amazon.com/blogs/compute/optimizing-disk-usage-on-amazon-ecs/
+cron 'clean-ecs-images' do
+  time :daily
+  action :create
+  command 'docker images -q | xargs --no-run-if-empty docker rmi >/dev/null 2>&1'
 end

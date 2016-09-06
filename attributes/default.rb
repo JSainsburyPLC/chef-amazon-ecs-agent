@@ -11,3 +11,4 @@ default['amazon-ecs-agent']['docker']['version'] = '1.11.2'
 default['amazon-ecs-agent']['reserved_memory'] = '64'
 default['amazon-ecs-agent']['docker_additional_binds'] = []
 default['amazon-ecs-agent']['docker_additional_env'] = []
+default['amazon-ecs-agent']['docker']['version'] = '1.11.2'
